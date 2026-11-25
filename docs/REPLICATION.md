@@ -11,7 +11,7 @@
 ```bash
 git clone https://github.com/ericALPHA37/ALPHA-Health-Assistant.git
 cd ALPHA-Health-Assistant
-npm ci
+npm install
 npm run lint
 npm run test
 npm run build

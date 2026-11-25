@@ -1,50 +1,16 @@
-import { useState } from 'react'
-
-interface Topic {
-  title: string
-  content: string
-  source: string
-}
-
-const topics: Topic[] = [
-  {
-    title: 'Hidratação',
-    content: 'A água ajuda a manter funções normais do organismo. As necessidades variam com idade, atividade, clima e condições de saúde. Bebidas açucaradas não substituem uma alimentação equilibrada.',
-    source: 'OMS — Água segura e saneamento: https://www.who.int/health-topics/water-sanitation-and-hygiene-wash',
-  },
-  {
-    title: 'Sono',
-    content: 'Horários regulares e um ambiente escuro e silencioso podem favorecer o sono. Sono persistente insuficiente ou sonolência diurna merece avaliação profissional.',
-    source: 'OMS — Saúde mental: https://www.who.int/health-topics/mental-health',
-  },
-  {
-    title: 'Vacinação',
-    content: 'O calendário vacinal depende do país, da idade e das condições individuais. Consulte o programa nacional ou um profissional antes de tomar decisões.',
-    source: 'OMS — Vacinas e imunização: https://www.who.int/health-topics/vaccines-and-immunization',
-  },
-]
-
-function findTopic(query: string): Topic | undefined {
-  const normalized = query.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '')
-  return topics.find((topic) => {
-    const haystack = `${topic.title} ${topic.content}`.toLower
-  
-      ()
-      .normalize('NFD')
-      .replace(/\p{Diacritic}/gu, '')
-    return haystack.includes(normalized) || normalized.split(' ').some((word) => haystack.includes(word))
-  })
-}
+import { useState, type FormEvent } from 'react'
+import { findTopic } from './data/topics'
+import './styles.css'
 
 export default function App() {
   const [query, setQuery] = useState('')
-  const [answer, setAnswer] = useState<Topic | null>(null)
+  const [answer, setAnswer] = useState<ReturnType<typeof findTopic>>(undefined)
   const [searched, setSearched] = useState(false)
 
-  function submit(event: React.FormEvent<HTMLFormElement>) {
+  function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     setSearched(true)
-    setAnswer(findTopic(query.trim())) ?? null
+    setAnswer(findTopic(query.trim()))
   }
 
   return (
@@ -68,7 +34,7 @@ export default function App() {
               id="question"
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="Ex.: sono, vacinação, hidratação"
+              placeholder="Ex.: vacinação, água potável"
               minLength={2}
               required
             />
@@ -78,11 +44,11 @@ export default function App() {
 
         {answer && (
           <article className="answer" aria-live="polite">
-            <span className="badge">Informação local verificada</span>
+            <span className="badge">Informação local com fonte</span>
             <h2>{answer.title}</h2>
             <p>{answer.content}</p>
-            <a href={answer.source.split(' — ')[1] || '#'} target="_blank" rel="noreferrer">
-              Consultar fonte de referência
+            <a href={answer.source.url} target="_blank" rel="noopener noreferrer">
+              Consultar: {answer.source.label}
             </a>
           </article>
         )}
